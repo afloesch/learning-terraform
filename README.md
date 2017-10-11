@@ -1,0 +1,5 @@
+# Learning Terraform
+
+If you aren't very familiar yet with Terraform and what it can do for you, we would recommend starting with the series of articles, created by Yevgeniy Brikman on the Gruntwork team, on [why they choose to use Terraform](https://blog.gruntwork.io/why-we-use-terraform-and-not-chef-puppet-ansible-saltstack-or-cloudformation-7989dad2865c), and the advantages in using it. It's an excellent series on the pros and cons of using terraform, and also covers some nice getting started tips and patterns for organizing your projects.
+
+Terraform is an amazing orchestration tool, but personally we found the practical examples and patterns, both in the documentation, and in various blog articles, to be a little sparse. We simply couldn't find anything that put it all together for us, so there was a fair amount of time spent figuring out how best to stitch everything together in real-world cloud infrastructure with many different applications. This guide attempts to aggregate both our, and the web's findings on how best to implement your IAC (infrastructure as code) with Terraform.

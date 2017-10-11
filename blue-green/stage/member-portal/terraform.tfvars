@@ -1,0 +1,10 @@
+region = "us-west-1"
+aws_access_key = "AKIAJABIMKYCP5RPAGPA"
+aws_secret_key = "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"
+aws_key_path = "~/.ssh/"
+aws_key_name = "aws.test"
+aws_ami = "ami-3a674d5a"
+instance_type = "t2.micro"
+
+sumo_access_id = "su3FMCcrIM4Cnk"
+sumo_access_key = "Ua08YUZU9JAqC8xj89xsKD9nthKh7JodwLVpFTcqiYoewEoFw55qzorBlxqiqfpb"
