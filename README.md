@@ -6,7 +6,7 @@ Terraform is an amazing orchestration tool, but personally we found the practica
 
 The examples go from most basic to "most complex" in the order below. The final example within blue-green aggregates everything demonstrated together, so you should start with wherever you are comfortable and familiar with the concepts.
 
-1) Single Machine
+1) [Single Machine](single-machine/README.md)
 2) Single machine inside a VPC
 3) VPC with public and private subnets
 4) Autoscaling cluster
