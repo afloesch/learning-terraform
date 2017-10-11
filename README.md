@@ -4,7 +4,7 @@ If you aren't very familiar yet with Terraform and what it can do for you, we re
 
 Terraform is an amazing orchestration tool, but personally we found the practical examples and patterns, both in the documentation and in various blog articles, to be a little sparse. We simply couldn't find anything that put it all together for us, so there was a fair amount of time spent figuring out how best to stitch everything together in real-world cloud infrastructure with many different applications. This guide attempts to aggregate both our, and the webs', findings on how best to implement your IAC (infrastructure as code) with Terraform.
 
-The examples go from most basic to "most complex" in the order below. The final example within blue-green aggregates everything demonstrated together, so you should start with wherever you are comfortable and familiar with the concepts.
+The examples generally progress from most basic to "most complex" in the order below. The final example within blue-green aggregates everything demonstrated together, so you should start wherever you are comfortable and familiar with the concepts.
 
 1) [Single Machine](single-machine/README.md)
 2) Single machine inside a VPC
