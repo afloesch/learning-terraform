@@ -11,7 +11,7 @@ To get started with Terraform, let's take a very basic example and provision a s
     - [AWS Keypair](#aws-keypair)
     - [AWS Security Group](#aws-security-group)
     - [AWS EC2 Instance](#aws-ec2-instance)
-- Terraform commands
+- [Terraform commands](#terraform-commands)
 
 ## Creating AWS creds and keys
 
@@ -80,7 +80,7 @@ With our variables declared and implemented, we now need to set the variable val
 
 #### By file
 
-To set our variable values in a file create a [terraform.tfvars](terraform.tfvars) file and set the variable values with each entry as a new line in the file. Terraform will automatically pull the values from this file. It is also possible to create separate variable files, and when named with the *.auto.tfvars file extension they will be automatically picked up by terraform as well.
+To set our variable values in a file create a [terraform.tfvars](terraform.tfvars) file and set the variable values with each entry as a new line in the file. Terraform will automatically pull the values from this file. We can also create separate variable files, and when named with the *.auto.tfvars file extension they will be automatically picked up by terraform as well.
 
 #### By environment variable
 
@@ -170,7 +170,7 @@ resource "aws_instance" "node" {
 }
 ```
 
-As you can see we need to create a new variable for the AMI id of the image we want to use. In this example we are going to use the latest Amazon Linux PV AMI version 2017.09.0.20170930, since HVM is only supported within a VPC.
+As you can see we need to create a new variable for the AMI id of the image we want to use. In this example we are going to use the Amazon Linux PV AMI version 2017.09.0.20170930, since HVM is only supported within a VPC.
 
 Let's review some of the parameters defined in this instance.
 
