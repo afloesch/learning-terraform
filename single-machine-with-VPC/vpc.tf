@@ -3,11 +3,6 @@ resource "aws_vpc" "default" {
 	cidr_block = "10.0.0.0/16"
 }
 
-# expose VPC with internet gateway
-resource "aws_internet_gateway" "default" {
-	vpc_id = "${aws_vpc.default.id}"
-}
-
 # create public subnet in availability zone us-west-1a
 resource "aws_subnet" "us-west-1a-public" {
 	vpc_id = "${aws_vpc.default.id}"
@@ -17,6 +12,11 @@ resource "aws_subnet" "us-west-1a-public" {
 	tags = {
 		Name = "Public Subnet"
 	}
+}
+
+# expose VPC with internet gateway
+resource "aws_internet_gateway" "default" {
+	vpc_id = "${aws_vpc.default.id}"
 }
 
 # Routing table for public subnets

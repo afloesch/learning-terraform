@@ -1,3 +1,13 @@
+variable "region" {
+	default = "us-west-1"
+}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "ssh_key" {}
+variable "aws_ami" {
+	default = "ami-fce9d99c"
+}
+
 provider "aws" {
   access_key = "${var.aws_access_key}"
   secret_key = "${var.aws_secret_key}"
@@ -42,8 +52,7 @@ resource "aws_instance" "node" {
     availability_zone = "us-west-1a"
     instance_type = "m1.small"
     key_name = "${aws_key_pair.dev.key_name}"
-    security_groups = ["${aws_security_group.web.name}"]
-    associate_public_ip_address = true
+    vpc_security_group_ids = ["${aws_security_group.web.id}"]
 
     tags {
         Name = "Nginx Example"
