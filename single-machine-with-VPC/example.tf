@@ -53,6 +53,7 @@ resource "aws_instance" "node" {
     instance_type = "m1.small"
     key_name = "${aws_key_pair.dev.key_name}"
     vpc_security_group_ids = ["${aws_security_group.web.id}"]
+    subnet_id = "${aws_subnet.us-west-1a-public.id}"
 
     tags {
         Name = "Nginx Example"
