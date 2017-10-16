@@ -57,7 +57,7 @@ resource "aws_subnet" "us-west-1a-public" {
 - **availability_zone** - The AWS availability zone of the region we are working in.
 - **map_public_ip_on_launch** - Boolean setting on whether to issue public ip addresses to instances created in this subnet. This will replace the associate_public_ip_address parameter we use on our instance since they perform duplicate functions.
 
-### AWS internet gateway
+### [AWS internet gateway](https://www.terraform.io/docs/providers/aws/r/internet_gateway.html)
 
 With our VPC and subnet created all we will have is an internal network which we can't reach, so let's expose the subnet we just created with an internet gateway.
 
