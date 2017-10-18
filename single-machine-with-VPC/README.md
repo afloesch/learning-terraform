@@ -115,7 +115,7 @@ resource "aws_security_group" "web" {
 }
 ```
 
-We also need to add an egress rule to the security group so that the machine can talk out of the VPC to the internet:
+We also need to add an egress rule to the security group so that the machine can talk out of the VPC to the internet. This rule will allow the box to use any ports or protocols, and connect with any IP outside of the VPC.
 
 ```
   egress {
