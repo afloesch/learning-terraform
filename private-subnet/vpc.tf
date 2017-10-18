@@ -69,7 +69,7 @@ resource "aws_route_table" "us-west-1-private" {
   }
 }
 
-# Routing entry for public subnet us-west-1a-public
+# Routing entry for public subnet us-west-1-public
 resource "aws_route_table_association" "us-west-1a-public" {
 	subnet_id = "${aws_subnet.us-west-1a-public.id}"
 	route_table_id = "${aws_route_table.us-west-1-public.id}"

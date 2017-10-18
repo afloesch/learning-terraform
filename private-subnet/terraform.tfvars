@@ -1,2 +1,2 @@
-aws_key_path = "~/.ssh/"
-aws_key_name = "aws.test"
+region = "us-west-1"
+ssh_key = "~/.ssh/aws.test.pub"
