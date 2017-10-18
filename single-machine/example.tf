@@ -48,7 +48,7 @@ resource "aws_security_group" "web" {
 resource "aws_instance" "node" {
     ami = "${var.aws_ami}"
     availability_zone = "us-west-1a"
-    instance_type = "t2.small"
+    instance_type = "m1.small"
     key_name = "${aws_key_pair.dev.key_name}"
     security_groups = ["${aws_security_group.web.name}"]
     associate_public_ip_address = true

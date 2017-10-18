@@ -5,7 +5,7 @@ variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "ssh_key" {}
 variable "aws_ami" {
-	default = "ami-fce9d99c"
+	default = "ami-02eada62"
 }
 
 provider "aws" {
@@ -43,6 +43,13 @@ resource "aws_security_group" "web" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
 }
 
 
@@ -50,7 +57,7 @@ resource "aws_security_group" "web" {
 resource "aws_instance" "node" {
     ami = "${var.aws_ami}"
     availability_zone = "us-west-1a"
-    instance_type = "m1.small"
+    instance_type = "t2.small"
     key_name = "${aws_key_pair.dev.key_name}"
     vpc_security_group_ids = ["${aws_security_group.web.id}"]
     subnet_id = "${aws_subnet.us-west-1a-public.id}"

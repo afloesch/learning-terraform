@@ -76,7 +76,7 @@ resource "aws_route_table" "us-west-1-public" {
     vpc_id = "${aws_vpc.default.id}"
 
     route {
-        cidr_block = "10.0.0.0/24"
+        cidr_block = "0.0.0.0/0"
         gateway_id = "${aws_internet_gateway.default.id}"
     }
 
@@ -113,6 +113,17 @@ resource "aws_security_group" "web" {
     vpc_id = "${aws_vpc.default.id}"
     ...
 }
+```
+
+We also need to add an egress rule to the security group so that the machine can talk out of the VPC to the internet:
+
+```
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
 ```
 
 The second change we need to make is to the `aws_instance`. Instead of using the `security_groups` param and the resource name of our security group, we are going to use the `vpc_security_group_ids` param and specify the id of the security group. 
