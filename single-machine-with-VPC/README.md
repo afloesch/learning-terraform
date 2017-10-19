@@ -13,7 +13,9 @@ Our [example.tf](example.tf) file is pretty much the same from the previous exam
     - [AWS internet gateway](#aws-internet-gateway)
     - [AWS route table](#aws-route-table)
     - [AWS route table association](#aws-route-table-association)
-- [Example.tf changes](#example.tf-changes)
+- [Example changes](#example-changes)
+    - [Security group changes](#security-group-changes)
+    - [Instance changes](#instance-changes)
 
 ## Working with multiple Terraform files
 
@@ -100,11 +102,13 @@ resource "aws_route_table_association" "us-west-1a-public" {
 }
 ```
 
-### [Example.tf](example.tf) changes
+## [Example](example.tf) changes
 
 With the VPC infrastructure defined, we need to make a few modifications to our example.tf file to properly create the instance inside the VPC.
 
-The first change to make is to the `aws_security_group`. To create the security group inside the VPC add the `vpc_id` parameter to the aws_security_group:
+### Security group changes
+
+The first set of changes to make is to the `aws_security_group`. To create the security group inside the VPC add the `vpc_id` parameter to the aws_security_group:
 
 ```
 resource "aws_security_group" "web" {
@@ -126,7 +130,9 @@ We also need to add an egress rule to the security group so that the machine can
   }
 ```
 
-The second change we need to make is to the `aws_instance`. Instead of using the `security_groups` param and the resource name of our security group, we are going to use the `vpc_security_group_ids` param and specify the id of the security group. 
+### Instance changes
+
+The second set of changes we need to make is to the `aws_instance`. Instead of using the `security_groups` param and the resource name of our security group, we are going to use the `vpc_security_group_ids` param and specify the id of the security group. 
 
 We also need to specify the `subnet_id` for the subnet we want to launch the instance in. In this case we want to launch the instance in the public subnet we are creating.
 
@@ -171,3 +177,5 @@ As you can see terrafrom is going to create 8 new cloud assets for us, so go ahe
 ```
 terraform apply
 ```
+
+The end result is not much different from the single machine example; we get a single Nginx box, but with a VPC we now have the ability to segregate and isolate infrastructure at a network level.
