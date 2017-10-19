@@ -8,7 +8,7 @@ The examples generally progress from most basic to "most complex" in the order b
 
 1) [Single Machine](single-machine/README.md)
 2) [Single machine inside a VPC](single-machine-with-VPC/README.md)
-3) VPC with public and private subnets
+3) [VPC with public and private subnets](private-subnet/README.md)
 4) Autoscaling cluster
 5) Modules
 6) Managing multiple environments

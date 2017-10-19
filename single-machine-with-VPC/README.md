@@ -39,7 +39,7 @@ This is the same as the default settings AWS would use if you create a VPC throu
 
 ### [AWS subnet](https://www.terraform.io/docs/providers/aws/r/subnet.html)
 
-With the VPC defined we can now add a subnet for our application server to live in. 
+With the VPC defined we can now add a subnet for our application server to live in. For simplicity we are only going to create one subnet in one availability zone, but best practices would be to spread your instances across zones. We will cover how best to implement launching subnets across multiple AZs in a later example.
 
 ```
 resource "aws_subnet" "us-west-1a-public" {
