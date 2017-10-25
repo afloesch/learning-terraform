@@ -1,3 +1,5 @@
+variable "public_ip" {}
+
 # create a security group to expose web traffic ports to public
 resource "aws_security_group" "public" {
   name        = "Public subnet hosts"
@@ -5,7 +7,7 @@ resource "aws_security_group" "public" {
   vpc_id = "${aws_vpc.default.id}"
 
   tags {
-    Name = "All Traffic"
+    Name = "Public Subnet Traffic"
   }
 
   ingress {
@@ -54,21 +56,21 @@ resource "aws_security_group" "web" {
   }
 }
 
-# create a security group to expose web traffic ports to public
+# create a security group to expose bastion host to SSH traffic over the net
 resource "aws_security_group" "bastion" {
   name        = "SSH Traffic"
   description = "Allow only ssh traffic and all outbound traffic"
   vpc_id = "${aws_vpc.default.id}"
 
   tags {
-    Name = "SSH"
+    Name = "SSH Traffic"
   }
 
   ingress {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    cidr_blocks     = ["0.0.0.0/0"]
+    cidr_blocks     = ["${var.public_ip}/32"]
   }
 
   egress {
