@@ -18,7 +18,7 @@ For this next example we are going to setup a VPC with both a public and a priva
     - [MySQL database](#mysql-database)
     - [phpMyAdmin](#phpmyadmin)
 - [Test it](#test-it)
-- Optimizing for production
+- [Optimizing for production](#optimizing-for-production)
 
 ## Terraform resources
 
@@ -65,7 +65,7 @@ resource "aws_eip" "nat" {
 
 ### [AWS NAT gateway](https://www.terraform.io/docs/providers/aws/r/nat_gateway.html)
 
-With an elastic IP allocated we can create the NAT gateway.
+With an elastic IP allocated we can create the NAT gateway. There are a number of older terraform examples on the web where the NAT gateway is built from a custom linux image optimized for the workload, running on an EC2 instance, but this introduces a single point of failure into your infrastructure. These examples which provision a single box for a NAT gateway were probably created before Amazon had the NAT gateway feature, so a much better approach now would be to use Amazon's NAT gateway which will scale much like a load balancer.
 
 ```
 resource "aws_nat_gateway" "default" {
@@ -335,3 +335,13 @@ ssh ec2-user@{mysql_ip}
 From here you can sudo to root and start running `mysql` commands.
 
 Another way to test the database is through the phpMyAdmin interface we also spun up. Get the public ip address of the SQL Admin box and load it into your browser. If you look at the `user_data` for the MySQL server you will see we created an "admin" user with the password "password". Use these creds to login and start playing with the database.
+
+## Optimizing for production
+
+While this example is fairly complete, there are still a few things we would want to do to really optimize this setup for a production deployment.
+
+Most important would be to setup some IAM users and roles, provision the boxes with an IAM user, and also setup perms on the S3 bucket to only accept requests from that specific IAM user. This will give finer grained access controls and much more flexibility then the AWS access and secret key creds. For example, you could integrate your AD or LDAP user accounts with IAM and control employee access with the company credentials.
+
+It would also be good to modify the security groups for the private subnet hosts so that they only open the ports needed from the public hosts, not all ports. 
+
+Lastly it is important to pick an optimal EBS volume type and size for the database.
