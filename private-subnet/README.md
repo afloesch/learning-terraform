@@ -340,7 +340,7 @@ Another way to test the database is through the phpMyAdmin interface we also spu
 
 While this example is fairly complete, there are still a few things we would want to do to really optimize this setup for a production deployment.
 
-Most important would be to setup some IAM users and roles, provision the boxes with an IAM user, and also setup perms on the S3 bucket to only accept requests from that specific IAM user. This will give finer grained access controls and much more flexibility then the AWS access and secret key creds. For example, you could integrate your AD or LDAP user accounts with IAM and control employee access with the company credentials.
+Most important would be to setup some IAM users and roles, provision the boxes with an IAM user, and also setup perms on the S3 bucket to only accept requests from that specific IAM user. This will give finer grained access controls and much more flexibility then the AWS access and secret key creds. For example, you could integrate your AD or LDAP user accounts with IAM and control employee access with the company credentials. As part of this it would also be good to remove the default ec2-user from the boxes.
 
 It would also be good to modify the security groups for the private subnet hosts so that they only open the ports needed from the public hosts, not all ports. 
 
