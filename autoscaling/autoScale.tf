@@ -1,3 +1,23 @@
+variable "region" {
+	default = "us-west-1"
+}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "ssh_key" {}
+variable "aws_ami" {
+	default = "ami-3a674d5a"
+}
+variable "app_name" {
+	type = "string"
+	default = "application"
+}
+variable "app_version" {
+	type = "string"
+}
+variable "docker_image" {
+	type = "string"
+}
+
 provider "aws" {
   access_key = "${var.aws_access_key}"
   secret_key = "${var.aws_secret_key}"
@@ -7,57 +27,12 @@ provider "aws" {
 # import the cert into amazon for accessing the boxes
 resource "aws_key_pair" "dev" {
   key_name   = "aws.test"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqTct2kzoI8GR008xizhsPfg+lbnZLWlxxSBP5nu7gm0KT3W3e+wdNzoQU21f6B/PW1YAVShJZP7I/OIXLQ82bW0PnFWxzXi+f9bz+ETmiIgKzaPOEP6W2IHyygHHc6Wy5OD6aLP5yjRJcvoKJXLp2C1wvviJjsvY8+c9g7Nk1F40/MSR4QqBE+mX4QgF1saTBKwLgOrLlqgYgrDnlmi+x4837f4W1BfPT/ruFGkqhRXG2IgonSEbNtL3XZ1tuzod7CCyjyKQ83vy8sXn/U/j3t3kId4lh5JlCPO+Q67aAK1c0oAvDos6JVtmofWT14Ud+2oOcD5x4Xi9i0Z5SzwXh andrew.loesch@C02Q9FEKG8WN-L"
-}
-
-# create a security group to expose web traffic ports to public
-resource "aws_security_group" "web" {
-  name        = "Web Traffic"
-  description = "Allow all inbound traffic from http (80) and https (443)"
-  vpc_id = "${aws_vpc.default.id}"
-
-  tags {
-    Name = "web-traffic"
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "ssh" {
-  name        = "ssh-traffic"
-  description = "Allow all SSH traffic"
-  vpc_id = "${aws_vpc.default.id}"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  public_key = "${file(var.ssh_key)}"
 }
 
 resource "aws_launch_configuration" "default" {
     image_id = "${var.aws_ami}"
-    instance_type = "${var.instance_type}"
+    instance_type = "t2.small"
     name = "${var.app_name}"
     key_name = "${var.aws_key_name}"
     security_groups = ["${aws_security_group.web.id}", "${aws_security_group.ssh.id}"]
@@ -70,6 +45,7 @@ resource "aws_launch_configuration" "default" {
     #!/bin/bash
     sudo su
     yum update -y
+
     yum install perl-Switch perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https -y
     curl http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip -O
     unzip CloudWatchMonitoringScripts-1.2.1.zip
@@ -78,9 +54,9 @@ resource "aws_launch_configuration" "default" {
     echo 'AWSAccessKeyId="${var.aws_access_key}"' >> aws.conf
     echo 'AWSSecretKey="${var.aws_secret_key}"' >> aws.conf
     (crontab -l ; echo "*/1 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=/ --from-cron")| crontab -
+
     yum install -y docker
     service docker start
-    usermod -a -G docker ec2-user
     docker run -p 80:80 -d ${var.docker_image}
     HEREDOC
 }
@@ -89,6 +65,7 @@ resource "aws_autoscaling_group" "default" {
     name = "${var.app_name}-${var.app_version}"
     max_size = 50
     min_size = 2
+    min_elb_capacity = 2
     launch_configuration = "${aws_launch_configuration.default.name}"
     health_check_type = "ELB"
     load_balancers = ["${aws_elb.default.id}"]

@@ -342,6 +342,8 @@ While this example is fairly complete, there are still a few things we would wan
 
 Most important would be to setup some IAM users and roles, provision the boxes with an IAM user, and also setup perms on the S3 bucket to only accept requests from that specific IAM user. This will give finer grained access controls and much more flexibility then the AWS access and secret key creds. For example, you could integrate your AD or LDAP user accounts with IAM and control employee access with the company credentials. As part of this it would also be good to remove the default ec2-user from the boxes.
 
+Next we would want to create additional subnets in both the public and private subnets on a new availability zone for high availability. Then we can create duplicate boxes in the new subnets, and create load balancers to route traffic to each individual cluster. This will protect the stack against one AZ in AWS going down. Even better would be to create a federated model and run multiple clusters in multiple AWS regions, and then leverage DNS to route based on the client location.
+
 It would also be good to modify the security groups for the private subnet hosts so that they only open the ports needed from the public hosts, not all ports. 
 
-Lastly it is important to pick an optimal EBS volume type and size for the database.
+Lastly it is important to pick an optimal EBS volume type and size for the database, and setup some cloudwatch alarms on the EBS volume disk usage to alert us if the drives are filling up.
