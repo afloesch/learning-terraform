@@ -55,7 +55,7 @@ resource "aws_elb" "default" {
   }
 
   cross_zone_load_balancing = true
-  idle_timeout = 300
+  idle_timeout = 60
   connection_draining = true
   connection_draining_timeout = 1200
 }
