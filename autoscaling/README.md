@@ -8,17 +8,19 @@ In this example we are going to pair-back the network resources a little bit and
     - [AWS ELB](#aws-elb)
     - [AWS load balancer stickiness policy](#aws-load-balancer-stickiness-policy)
     - [AWS launch configuration](#aws-launch-configuration)
-    - AWS autoscaling group
-    - AWS autoscaling policy
-    - AWS cloudwatch metric alarm
+    - [AWS autoscaling group](#aws-autoscaling-group)
+    - [AWS autoscaling policy](#aws-autoscaling-policy)
+    - [AWS cloudwatch metric alarm](#aws-cloudwatch-metric-alarm)
+- [Build the autoscaling group](#build-the-autoscaling-group)
+- [Test the autoscaling group](#test-the-autoscaling-group)
 
 ## Terraform resources
 
-Let's create a couple new variables to improve the resource names for the assets created on AWS. Add `app_name` and `app_version` to the top of the autoScale.tf file to descriptively name all of our AWS resources.
+Let's create a couple new variables to improve the resource names for the assets created on AWS. Add `app_name` and `app_version` to the top of the [autoscale.tf](autoscale.tf) file to descriptively name all of our AWS resources.
 
 ### [AWS ELB](https://www.terraform.io/docs/providers/aws/r/elb.html)
 
-Since we are going to create an autoscaling cluster the first item we will need is a load balancer to route the traffic to the cluster hosts. For this example we will setup a classic AWS load balancer to proxy the requests to.
+Since we are going to create an autoscaling cluster, the first item we will need is a load balancer to route the traffic to the cluster hosts. For this example we will setup a classic AWS load balancer to proxy the requests to the hosts.
 
 ```
 resource "aws_elb" "default" {
@@ -182,7 +184,7 @@ resource "aws_autoscaling_policy" "scale-down" {
 
 ### [AWS cloudwatch metric alarm](https://www.terraform.io/docs/providers/aws/r/cloudwatch_metric_alarm.html)
 
-Now we can create the rules which will trigger our "scale-up" and "scale-down" policies. There are many strategies for scaling your cluster nodes. To do it really effectively we need to run the application under true production loads for a while and profile the application. How many requests is it serving? How many open connections? How much CPU does it use? How much memory? If it's a database how fast does the disk space grow? Once you know the profile of the application you can actually plan for when to scale the cluster nodes up and down. Profiling the application is also helpful for choosing the optimal EC2 instance type. But to start you have to make some best guesses, and leave the settings very loose, effectively costing more in the short-run, until the application profile is really understood and scaling can be fully optimized without hindering application performance.
+Now we can create the rules which will trigger our "scale-up" and "scale-down" policies. There are many strategies for scaling your cluster nodes. To do it really well we need to run the application under true production loads for a while and profile the application. How many requests is it serving? How many open connections? How much CPU does it use? How much memory? If it's a database how fast does the disk space grow? Once you know the profile of the application you can actually plan for when to scale the cluster nodes up and down. Profiling the application is also helpful for choosing the optimal EC2 instance size. But to start we have to make some best guesses, and leave the settings very loose, effectively costing more in the short-run, until the application profile is really understood and scaling can be fully optimized without hindering application performance.
 
 A basic scaling rule that just about any cluster will need is on CPU usage, so let's define a couple rules to scale the cluster based on high and low CPU usage across the nodes.
 
@@ -192,8 +194,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu-high" {
     namespace = "AWS/EC2"
     comparison_operator = "GreaterThanOrEqualToThreshold"
     evaluation_periods = "1"
-    metric_name = "CPUUtilization"
     period = "60"
+    metric_name = "CPUUtilization"
     statistic = "Average"
     threshold = "10"
     alarm_description = "This metric monitors CPU for high utilization on agent hosts"
@@ -210,8 +212,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu-low" {
     namespace = "AWS/EC2"
     comparison_operator = "LessThanOrEqualToThreshold"
     evaluation_periods = "15"
-    metric_name = "CPUUtilization"
     period = "60"
+    metric_name = "CPUUtilization"
     statistic = "Average"
     threshold = "2"
     alarm_description = "This metric monitors CPU for low utilization on agent hosts"
@@ -223,3 +225,81 @@ resource "aws_cloudwatch_metric_alarm" "cpu-low" {
     }
 }
 ```
+
+- **namespace** - See the AWS docs for information on the [different namespaces](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-namespaces.html). In this example we want to monitor our EC2 instances.
+- **comparison_operator** - Supported values are GreaterThanOrEqualToThreshold, GreaterThanThreshold, LessThanThreshold, LessThanOrEqualToThreshold.
+- **evaluation_periods** - The number of periods where the condition evaluates to true before triggering the alarm.
+- **period** - The length in time in seconds, where a particular `metric_name` must meet the `threshold` of the choosen `comparison_operator` over the defined period length to evaluate to true.
+- **metric_name** - The kind of supported cloudwatch metric to track. The list of supported metrics for all AWS services are available [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CW_Support_For_AWS.html).
+- **statistic** - Supported values are SampleCount, Average, Sum, Minimum, Maximum.
+- **threshold** - The value to compare the `statistic` against.
+
+For the "cpu-high" alarm we are defining a very low threshold for average CPU usage in the cluster. If the CPU usage goes higher than 10% over one 60 second period, then the alarm will trigger our "scale-up" policy. We have set this very low to enable easy testing of the autoscaling group, but for a new service running in production we should increase the threshold to something like 50 or 60 percent. Once the application has been fully profiled this value can be more finely tuned.
+
+For the "cpu-low" alarm we are going to bump up the `evaluation_periods` setting so that the threshold must be true for a total of 15 minutes before triggering our alarm, this way we give adequate time to ensure the load has decreased before removing boxes from the cluster. Similar to "cpu-high" we have set the threshold very low to demonstrate and test the autoscaling policy fully, but for production we would increase this to something like 15 or 20 percent. Once the application has been fully profiled this value can be more finely tuned.
+
+With the CPU usage tracked it is also good to setup some basic alarms around memory usage. As we pointed out earlier, tracking memory depends on setting up Cloudwatch metrics on each individual host, which we have configured in the launch configuration for the instances.
+
+```
+resource "aws_cloudwatch_metric_alarm" "memory-high" {
+    alarm_name = "${var.app_name}-${var.app_version}-mem-util-high"
+    comparison_operator = "GreaterThanOrEqualToThreshold"
+    evaluation_periods = "1"
+    metric_name = "MemoryUtilization"
+    namespace = "System/Linux"
+    period = "60"
+    statistic = "Average"
+    threshold = "90"
+    alarm_description = "This metric monitors ec2 memory for high utilization on agent hosts"
+    alarm_actions = [
+        "${aws_autoscaling_policy.scale-up.arn}"
+    ]
+    dimensions {
+        AutoScalingGroupName = "${aws_autoscaling_group.default.name}"
+    }
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory-low" {
+    alarm_name = "${var.app_name}-${var.app_version}-mem-util-low"
+    comparison_operator = "LessThanOrEqualToThreshold"
+    evaluation_periods = "15"
+    metric_name = "MemoryUtilization"
+    namespace = "System/Linux"
+    period = "60"
+    statistic = "Average"
+    threshold = "50"
+    alarm_description = "This metric monitors ec2 memory for low utilization on agent hosts"
+    alarm_actions = [
+        "${aws_autoscaling_policy.scale-down.arn}"
+    ]
+    dimensions {
+        AutoScalingGroupName = "${aws_autoscaling_group.default.name}"
+    }
+}
+```
+
+### Build the autoscaling group
+
+Check the terraform plan to see what will be created by our terraform scripts.
+
+```
+terraform plan
+```
+
+Run terraform to create the application cluster.
+
+```
+terraform apply
+```
+
+### Test the autoscaling group
+
+With the resources created login to the AWS console and grab the public DNS for the created load balancer and load it into your browser. If all is working you will get the default Nginx page.
+
+To fully test the autoscaling group though, we will need to put more load on the service than a few basic http requests from one client. An easy way to do some basic load testing is with apache benchmark from your local machine. This isn't perfect, since you are bottle-necked by the one NIC on your machine, but we have set the CPU thresholds so low we should be able to generate enough of a load to test the autoscaling policy is working.
+
+```
+ab -k -c 1000 -n 500000 nginx-test-554558040.us-west-1.elb.amazonaws.com/
+```
+
+The above apache benchmark command will create 1000 concurrent connections and send 500K requests. It might take a little while to run on your machine, but should be enough traffic to trigger the CPU high alarm and add a server to the cluster. Once you stop load testing the servers the CPU usage will drop down and trigger our CPU low alarm, removing a box from the cluster.

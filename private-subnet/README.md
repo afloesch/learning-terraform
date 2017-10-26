@@ -319,6 +319,8 @@ With all of our resources defined go and create the infrastructure.
 terraform apply
 ```
 
+If you have not defined the `bucket_name` variable value in the .tfvars file, and have not set it in an environment variable, then terraform will prompt you for the value at the command line. Try to pick a unqiue name or terraform will not be able to create the S3 bucket.
+
 If you login to the AWS console you will see this created three new instances for us. Grab the public ip address of the bastion host and SSH into it.
 
 ```

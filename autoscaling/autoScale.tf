@@ -13,9 +13,7 @@ variable "app_name" {
 }
 variable "app_version" {
 	type = "string"
-}
-variable "docker_image" {
-	type = "string"
+    default = "1.0.0"
 }
 
 provider "aws" {
@@ -32,8 +30,8 @@ resource "aws_key_pair" "dev" {
 
 resource "aws_elb" "default" {
   name = "${var.app_name}"
-  subnets = ["${var.subnet_ids}"]
-  security_groups = ["${var.security_groups}"]
+  subnets = ["${aws_subnet.us-west-1a-public.id}", "${aws_subnet.us-west-1b-public.id}"]
+  security_groups = ["${aws_security_group.web.id}"]
 
   lifecycle { 
     prevent_destroy = true 
@@ -71,7 +69,7 @@ resource "aws_launch_configuration" "default" {
     image_id = "${var.aws_ami}"
     instance_type = "t2.small"
     name = "${var.app_name}"
-    key_name = "${var.aws_key_name}"
+    key_name = "${aws_key_pair.dev.key_name}"
     security_groups = ["${aws_security_group.web.id}", "${aws_security_group.ssh.id}"]
 
     lifecycle {
@@ -164,6 +162,42 @@ resource "aws_cloudwatch_metric_alarm" "cpu-low" {
     statistic = "Average"
     threshold = "2"
     alarm_description = "This metric monitors CPU for low utilization on agent hosts"
+    alarm_actions = [
+        "${aws_autoscaling_policy.scale-down.arn}"
+    ]
+    dimensions {
+        AutoScalingGroupName = "${aws_autoscaling_group.default.name}"
+    }
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory-high" {
+    alarm_name = "${var.app_name}-${var.app_version}-mem-util-high"
+    comparison_operator = "GreaterThanOrEqualToThreshold"
+    evaluation_periods = "2"
+    metric_name = "MemoryUtilization"
+    namespace = "System/Linux"
+    period = "60"
+    statistic = "Average"
+    threshold = "90"
+    alarm_description = "This metric monitors ec2 memory for high utilization on agent hosts"
+    alarm_actions = [
+        "${aws_autoscaling_policy.scale-up.arn}"
+    ]
+    dimensions {
+        AutoScalingGroupName = "${aws_autoscaling_group.default.name}"
+    }
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory-low" {
+    alarm_name = "${var.app_name}-${var.app_version}-mem-util-low"
+    comparison_operator = "LessThanOrEqualToThreshold"
+    evaluation_periods = "15"
+    metric_name = "MemoryUtilization"
+    namespace = "System/Linux"
+    period = "60"
+    statistic = "Average"
+    threshold = "20"
+    alarm_description = "This metric monitors ec2 memory for low utilization on agent hosts"
     alarm_actions = [
         "${aws_autoscaling_policy.scale-down.arn}"
     ]
