@@ -30,6 +30,43 @@ resource "aws_key_pair" "dev" {
   public_key = "${file(var.ssh_key)}"
 }
 
+resource "aws_elb" "default" {
+  name = "${var.app_name}"
+  subnets = ["${var.subnet_ids}"]
+  security_groups = ["${var.security_groups}"]
+
+  lifecycle { 
+    prevent_destroy = true 
+  }
+
+  listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 5
+    timeout = 3
+    target = "HTTP:80/"
+    interval = 30
+  }
+
+  cross_zone_load_balancing = true
+  idle_timeout = 300
+  connection_draining = true
+  connection_draining_timeout = 1200
+}
+
+resource "aws_lb_cookie_stickiness_policy" "default" {
+  name = "http-sticky-policy"
+  load_balancer = "${aws_elb.default.id}"
+  lb_port = 80
+  cookie_expiration_period = 1200
+}
+
 resource "aws_launch_configuration" "default" {
     image_id = "${var.aws_ami}"
     instance_type = "t2.small"
@@ -57,7 +94,7 @@ resource "aws_launch_configuration" "default" {
 
     yum install -y docker
     service docker start
-    docker run -p 80:80 -d ${var.docker_image}
+    docker run -p 80:80 -d nginx:latest
     HEREDOC
 }
 
