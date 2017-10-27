@@ -283,6 +283,7 @@ resource "aws_cloudwatch_metric_alarm" "memory-low" {
 Check the terraform plan to see what will be created by our terraform scripts.
 
 ```
+terraform init
 terraform plan
 ```
 

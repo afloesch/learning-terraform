@@ -166,9 +166,10 @@ resource "aws_instance" "node" {
 }
 ```
 
-With all the necesssary changes made let's see what changes terraform will make for us.
+With all the necesssary changes made let's initialize terraform and see what changes terraform will make for us.
 
 ```
+terraform init
 terraform plan
 ```
 

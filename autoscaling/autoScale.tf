@@ -33,9 +33,7 @@ resource "aws_elb" "default" {
   subnets = ["${aws_subnet.us-west-1a-public.id}", "${aws_subnet.us-west-1b-public.id}"]
   security_groups = ["${aws_security_group.web.id}"]
 
-  lifecycle { 
-    prevent_destroy = true 
-  }
+  #lifecycle { prevent_destroy = true }
 
   listener {
     instance_port = 80

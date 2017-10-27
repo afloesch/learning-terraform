@@ -313,9 +313,10 @@ The only setting we need is for the MySQL server host using the PMA_HOST environ
 
 ## Test it
 
-With all of our resources defined go and create the infrastructure.
+With all of our resources defined go ahead and create the infrastructure.
 
 ```
+terraform init
 terraform apply
 ```
 
