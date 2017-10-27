@@ -10,7 +10,7 @@ The examples generally progress from most basic to "most complex" in the order b
 2) [Single machine inside a VPC](single-machine-with-VPC/)
 3) [VPC with public and private subnets](private-subnet/)
 4) [Autoscaling cluster](autoscaling/)
-5) Modules
+5) [Modules](modules/)
 6) Managing multiple environments
 7) Namespacing different applications
 8) Blue/green deployment with Canary support
