@@ -1,9 +1,7 @@
 # create VPC for public facing services
 resource "aws_vpc" "default" {
 	cidr_block = "${var.vpc_block}"
-
 	lifecycle { prevent_destroy = true }
-
 	tags {
 		Name = "${var.name}"
 	}
@@ -23,9 +21,9 @@ resource "aws_route_table" "public" {
 		gateway_id = "${aws_internet_gateway.default.id}"
 	}
 
-  tags {
-    Name = "Public Subnet"
-  }
+	tags {
+		Name = "Public Subnet"
+	}
 }
 
 # create public subnet in specified azs
@@ -35,12 +33,10 @@ resource "aws_subnet" "subnet" {
 	cidr_block = "${element(var.subnet_blocks, count.index)}"
 	availability_zone = "${element(var.azs, count.index)}"
 	map_public_ip_on_launch = true
-
     tags {
         Name = "public-subnet"
     }
 }
-
 
 # Routing entry for public subnets
 resource "aws_route_table_association" "subnet" {
