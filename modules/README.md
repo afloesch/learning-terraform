@@ -10,8 +10,8 @@ Let's take the VPC and public subnets used in our previous example, and refactor
     - [Built-in functions](#built-in-functions)
     - [Meta-parameters](#meta-parameters)
     - [Outputs](#outputs)
-- Using modules
-    - Module sources
+- [Using modules](#using-modules)
+    - [Module sources](#module-sources)
 
 ## [Creating modules](https://www.terraform.io/docs/modules/create.html)
 
@@ -164,6 +164,54 @@ So what's with the * in `public_subnet_ids`? Because we are using the count meta
 
 Now our network module returns the id of the VPC, and a list of all subnet ids so that we can use them in other resources.
 
-## Using modules
+## [Using modules](https://www.terraform.io/docs/modules/usage.html)
 
-Having a defined module is great, but now we need to implement the module to actually create something with Terraform. Move up from the module directory and create an [example.tf](example.tf) file in the base modules folder.
+Having a defined module is great, but now we need to implement the module to actually create something with Terraform. Move up from the module directory and create an [example.tf](example.tf) file in the base modules folder. Inside example.tf put the following content:
+
+```
+variable "region" {
+	default = "us-west-1"
+}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+
+provider "aws" {
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
+  region     = "${var.region}"
+}
+
+module "network" {
+    source = "./module/network"
+
+    name = "Main"
+    vpc_block = "10.0.0.0/16"
+    subnet_blocks = ["10.0.0.0/24" , "10.0.1.0/24"]
+    azs = ["us-west-1a", "us-west-1b"]
+}
+```
+
+To implement our module we use the same variables and provider from the previous examples, but for the actual VPC now we reference the network module and let it define our VPC. 
+
+### [Module sources](https://www.terraform.io/docs/modules/sources.html)
+
+The `source` variable allows us to specify modules from various locations. In this example we are simply referencing the module through the local file system, but Terraform supports many other sources for a module, like the Terraform registry or GitHub. The value of source tells Terraform where to find the module, and to fetch the latest version of the module it is necessary to run the command:
+
+```
+terraform get
+```
+
+It is safe to run `terraform get` multiple times, like `terraform init`, and it is necessary to run get anytime a module is changed, or a new module is implemented.
+
+Now we can view the Terraform plan
+
+```
+terraform init
+terraform plan
+```
+
+and build the infrastructure.
+
+```
+terraform apply
+```
