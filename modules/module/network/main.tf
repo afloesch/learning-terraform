@@ -1,7 +1,7 @@
 # create VPC for public facing services
 resource "aws_vpc" "default" {
 	cidr_block = "${var.vpc_block}"
-	lifecycle { prevent_destroy = true }
+	#lifecycle { prevent_destroy = true }
 	tags {
 		Name = "${var.name}"
 	}
