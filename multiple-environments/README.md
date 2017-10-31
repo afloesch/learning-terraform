@@ -92,4 +92,6 @@ While it is ideal that we have completely segragated infrastructure using this m
 
 For example, let's say we wanted to create stage with smaller instances than production. If we used a Terraform workspace to accomplish this we would probably start with production first, apply that, then create a stage workspace, make the desired instance size changes, and then apply those changes. Now our Terraform scripts are left with the stage instance settings checked in, and the production settings only live in the state file. Either way we go we are left with one environment where the actual settings are only set in the terraform.state file, and nowhere in the explicitly defined scripts.
 
+This in-turn creates a problem in that it becomes very easy to make accidental changes to the wrong environment. Tech ops or developers cannot forget to change to the correct workspace, or they *will* create an unintended change, whereas if the different environments are in different directories this scenario is just not possible.
+
 Having the state for ALL environments explicitly checked in is a much safer approach.
