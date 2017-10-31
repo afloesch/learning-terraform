@@ -12,7 +12,7 @@ The examples generally progress from most basic to "most complex" in the order b
 4) [Autoscaling cluster](autoscaling/)
 5) [Modules](modules/)
 6) [Managing multiple environments](multiple-environments/)
-7) Namespacing different applications
-8) Blue/green deployment with Canary support
+7) [Namespacing different applications](namespacing/)
+8) [Blue/green deployment with Canary support](blue-green/)
 
 We have avoided using a separate configuration tool like [Chef](https://www.chef.io/chef/), [Ansible](https://www.ansible.com/), or [Puppet](https://docs.puppet.com/puppet/) to provision the machines, and have instead substituted [Docker](https://www.docker.com/) to accomplish most of the machine provisioning tasks. We made this choice both to keep the examples simple, and because eliminating those pieces from the stack removes any dependency on those tools. It would be fairly trivial to layer any of these tools on-top of Terraform for the provisioning work if your stack requires it, but the simplicity of Terraform and Docker alone is very compelling, and lends itself well to an immutable infrastructure pattern.
