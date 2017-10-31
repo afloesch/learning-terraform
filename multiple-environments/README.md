@@ -16,7 +16,7 @@ Using directories to manage multiple environments is great as long as the projec
 
 Let's explore this option by building on the previous modules example. We will use the network module we just created, but implement it twice, once for a stage environment, and once for a production environment. To manage the different environments all we will do is create a directory per environment, in this case one directory for stage and one directory for prod.
 
-In the stage and production directories all we have done is copy the terraform.tfvars file and the example.tf file from the modules examples, with a couple small changes. Let's look at stage:
+In the stage and production directories all we have done is copy the terraform.tfvars file and the example.tf file from the modules example, with a couple small changes. Let's look at stage:
 
 ```
 variable "region" {
@@ -69,3 +69,27 @@ This approach becomes slightly more difficult if there are assets which are shar
 ## [Workspaces](https://www.terraform.io/docs/state/workspaces.html)
 
 *Disclaimer: We would not recommend using Terraform workspaces. We are covering it here for your edification and to present the reasons for avoiding it.*
+
+Terraform describes a workspace as simply "a named container for Terraform state. With multiple workspaces, a single directory of Terraform configuration can be used to manage multiple distinct sets of infrastructure resources." Cool, sounds exactly like what we want to do here, so let's try a practical example.
+
+To list all of the current workspaces:
+
+```
+terraform workspace list
+```
+
+As you can see we have one workspace defined called default. Let's create a new workspace:
+
+```
+terraform workspace new stage
+```
+
+When creating a new workspace Terraform tells us "you're now on a new, empty workspace. Workspaces isolate their state,
+so if you run `terraform plan` Terraform will not see any existing state
+for this configuration." This means that any inrastructure created with the default workspace will not be seen by the stage workspace, so if we apply the changes on the stage workspace we will get a completely separate VPC in AWS. 
+
+While it is ideal that we have completely segragated infrastructure using this model, going with a workspace to do the segragation creates a pretty major issue. We have no capability to support differences between separate environments, and keep those differences clearly kept in source control. All of the workspace state is kept in the terraform.state file, which you have probably noticed when creating any infrastructure with terraform, and while you could potentially check the state file into source control, this is not a best practice because any changes to infrastructure would then need to be checked in after the push, and also because there is no support for state locking through source control. Terraform only supports state locking when hosting with Consul or S3 (we will talk more about remote state in the blue/green deployment example). 
+
+For example, let's say we wanted to create stage with smaller instances than production. If we used a Terraform workspace to accomplish this we would probably start with production first, apply that, then create a stage workspace, make the desired instance size changes, and then apply those changes. Now our Terraform scripts are left with the stage instance settings checked in, and the production settings only live in the state file. Either way we go we are left with one environment where the actual settings are only set in the terraform.state file, and nowhere in the explicitly defined scripts.
+
+Having the state for ALL environments explicitly checked in is a much safer approach.
