@@ -52,7 +52,6 @@ resource "aws_security_group" "web" {
   }
 }
 
-
 # create base boxes to serve application
 resource "aws_instance" "node" {
     ami = "${var.aws_ami}"
